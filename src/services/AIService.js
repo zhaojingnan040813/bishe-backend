@@ -48,10 +48,11 @@ class AIService {
   "name": "药物名称",
   "genericName": "通用名",
   "category": "分类",
-  "description": "详细描述",
+  "description": "简短描述（1-2句话）",
   "sideEffects": ["副作用1", "副作用2"],
   "contraindications": ["禁忌症1", "禁忌症2"],
-  "dosage": "用法用量"
+  "dosage": "用法用量",
+  "aiAnalysis": "详细的长文本描述，包含以下内容：\n1. 药物的特性和基本信息\n2. 药物的起源和历史背景\n3. 与哪些药物相生相克（相互作用）\n4. 主要成分构成及各成分的作用\n5. 作用机制（为什么能起到这样的作用）\n6. 可替代的药物或物品\n7. 其他重要信息"
 }`
 
       // 使用超时控制
@@ -61,7 +62,7 @@ class AIService {
           messages: [
             {
               role: 'system',
-              content: '你是一个专业的药物信息分析助手，请提供准确、专业的药物信息。',
+              content: '你是一个专业的药物信息分析助手，请提供准确、专业、详细的药物信息。对于aiAnalysis字段，请提供一个详细的、结构化的长文本描述，包含药物的各个方面。',
             },
             {
               role: 'user',

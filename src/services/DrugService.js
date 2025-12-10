@@ -199,7 +199,7 @@ class DrugService {
         sideEffects: aiResult.sideEffects || [],
         contraindications: aiResult.contraindications || [],
         dosage: aiResult.dosage,
-        aiAnalysis: JSON.stringify(aiResult),
+        aiAnalysis: aiResult.aiAnalysis || '',  // 详细的长文本描述
         source: 'ai',
       }
 

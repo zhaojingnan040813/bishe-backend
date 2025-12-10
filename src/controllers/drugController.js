@@ -217,6 +217,50 @@ export const getDrugById = async (ctx) => {
  *     responses:
  *       200:
  *         description: 成功返回药物分析结果
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       description: 药物名称
+ *                     genericName:
+ *                       type: string
+ *                       description: 通用名
+ *                     description:
+ *                       type: string
+ *                       description: 简短描述
+ *                     category:
+ *                       type: string
+ *                       description: 药物分类
+ *                     sideEffects:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: 副作用列表
+ *                     contraindications:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *                       description: 禁忌症列表
+ *                     dosage:
+ *                       type: string
+ *                       description: 用法用量
+ *                     aiAnalysis:
+ *                       type: string
+ *                       description: 详细的长文本描述，包含药物特性、起源、相互作用、成分、作用机制、替代品等信息
+ *                     source:
+ *                       type: string
+ *                       enum: [ai, database]
+ *                       description: 数据来源
+ *                 timestamp:
+ *                   type: number
  *       400:
  *         description: 请求参数错误
  *       502:
