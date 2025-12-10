@@ -78,6 +78,68 @@ router.get('/swagger.json', (ctx) => {
             500: { description: '服务器错误' },
           },
         },
+        post: {
+          tags: ['Drugs'],
+          summary: '保存药物到数据库',
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['name', 'description', 'category'],
+                  properties: {
+                    name: {
+                      type: 'string',
+                      description: '药物名称',
+                    },
+                    genericName: {
+                      type: 'string',
+                      description: '通用名',
+                    },
+                    description: {
+                      type: 'string',
+                      description: '描述',
+                    },
+                    category: {
+                      type: 'string',
+                      description: '分类',
+                    },
+                    sideEffects: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: '副作用',
+                    },
+                    contraindications: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: '禁忌症',
+                    },
+                    dosage: {
+                      type: 'string',
+                      description: '用法用量',
+                    },
+                    aiAnalysis: {
+                      type: 'string',
+                      description: 'AI分析结果',
+                    },
+                    source: {
+                      type: 'string',
+                      enum: ['manual', 'ai'],
+                      description: '数据来源',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            201: { description: '成功保存药物' },
+            400: { description: '请求参数错误' },
+            409: { description: '药物已存在' },
+            500: { description: '服务器错误' },
+          },
+        },
       },
       '/api/drugs/search': {
         get: {
