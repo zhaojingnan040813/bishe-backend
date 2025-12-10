@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "test": "jest"
+    "seed": "node src/seeds/seedDatabase.js",
+    "seed:clear": "node src/seeds/seedDatabase.js --clear"
   },
   "dependencies": {
     "koa": "^2.15.0",
@@ -18,9 +19,5 @@
     "winston": "^3.11.0",
     "koa2-swagger-ui": "^5.10.0",
     "koa-swagger-decorator": "^1.8.7"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "fast-check": "^3.15.0"
   }
 }
