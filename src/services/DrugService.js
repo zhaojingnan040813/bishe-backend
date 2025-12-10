@@ -15,12 +15,10 @@ class DrugService {
    */
   async findAll(page = 1, limit = 10) {
     try {
-      // 参数验证
       const pageNum = Math.max(1, parseInt(page))
       const limitNum = Math.min(100, Math.max(1, parseInt(limit)))
       const skip = (pageNum - 1) * limitNum
 
-      // 查询数据库
       const [drugs, total] = await Promise.all([
         Drug.find()
           .sort({ createdAt: -1 })
@@ -65,28 +63,18 @@ class DrugService {
         throw new Error('搜索关键词不能为空')
       }
 
-      // 使用正则表达式进行模糊匹配（不区分大小写）
       const regex = new RegExp(searchTerm, 'i')
       const drugs = await Drug.find({
-        $or: [
-          { name: regex },
-          { genericName: regex },
-        ],
+        $or: [{ name: regex }, { genericName: regex }],
       })
         .sort({ name: 1 })
         .lean()
 
-      logger.info('搜索药物', {
-        searchTerm,
-        count: drugs.length,
-      })
+      logger.info('搜索药物', { searchTerm, count: drugs.length })
 
       return drugs
     } catch (error) {
-      logger.error('搜索药物失败', {
-        searchTerm: name,
-        error: error.message,
-      })
+      logger.error('搜索药物失败', { searchTerm: name, error: error.message })
       throw error
     }
   }
@@ -103,19 +91,11 @@ class DrugService {
       }
 
       const drug = await Drug.findById(id).lean()
-
-      if (drug) {
-        logger.info('查询药物详情', { id, found: true })
-      } else {
-        logger.info('查询药物详情', { id, found: false })
-      }
+      logger.info('查询药物详情', { id, found: !!drug })
 
       return drug
     } catch (error) {
-      logger.error('查询药物详情失败', {
-        id,
-        error: error.message,
-      })
+      logger.error('查询药物详情失败', { id, error: error.message })
       throw error
     }
   }
@@ -127,7 +107,6 @@ class DrugService {
    */
   async create(drugData) {
     try {
-      // 验证必需字段
       if (!drugData.name) {
         throw new Error('药物名称不能为空')
       }
@@ -144,7 +123,6 @@ class DrugService {
         throw new Error(`药物 "${drugData.name}" 已存在`)
       }
 
-      // 创建药物记录
       const drug = new Drug(drugData)
       await drug.save()
 
@@ -167,6 +145,7 @@ class DrugService {
   /**
    * 根据名称查询或分析药物（缓存优先策略）
    * 优先查询数据库，不存在时调用AI接口
+   * 注意：AI分析结果不会自动保存，需要用户确认后手动调用create方法
    * @param {string} name - 药物名称
    * @returns {Promise<{drug: Object, source: string}>}
    */
@@ -211,7 +190,7 @@ class DrugService {
         throw new Error('AI返回的数据不完整，缺少必需字段')
       }
 
-      // 4. 将AI分析结果存储到数据库（AI结果持久化）
+      // 4. 构建药物数据对象（不保存到数据库，由用户确认后手动保存）
       const drugData = {
         name: aiResult.name || drugName,
         genericName: aiResult.genericName,
@@ -224,23 +203,17 @@ class DrugService {
         source: 'ai',
       }
 
-      const newDrug = await this.create(drugData)
-
-      logger.info('AI分析结果已保存到数据库', {
+      logger.info('AI分析完成，等待用户确认保存', {
         name: drugName,
-        id: newDrug._id,
         source: 'ai',
       })
 
       return {
-        drug: newDrug,
+        drug: drugData,
         source: 'ai',
       }
     } catch (error) {
-      logger.error('查询或分析药物失败', {
-        name,
-        error: error.message,
-      })
+      logger.error('查询或分析药物失败', { name, error: error.message })
       throw error
     }
   }
@@ -270,10 +243,7 @@ class DrugService {
 
       return drug
     } catch (error) {
-      logger.error('根据名称查询药物失败', {
-        name,
-        error: error.message,
-      })
+      logger.error('根据名称查询药物失败', { name, error: error.message })
       throw error
     }
   }
@@ -290,7 +260,6 @@ class DrugService {
         throw new Error('药物ID不能为空')
       }
 
-      // 不允许更新某些字段
       delete updateData._id
       delete updateData.createdAt
       delete updateData.updatedAt
@@ -309,10 +278,7 @@ class DrugService {
 
       return drug
     } catch (error) {
-      logger.error('更新药物信息失败', {
-        id,
-        error: error.message,
-      })
+      logger.error('更新药物信息失败', { id, error: error.message })
       throw error
     }
   }
@@ -338,10 +304,7 @@ class DrugService {
 
       return true
     } catch (error) {
-      logger.error('删除药物失败', {
-        id,
-        error: error.message,
-      })
+      logger.error('删除药物失败', { id, error: error.message })
       throw error
     }
   }

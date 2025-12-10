@@ -4,6 +4,7 @@ import {
   searchDrugs,
   getDrugById,
   analyzeDrug,
+  saveDrug,
 } from '../controllers/drugController.js'
 
 const router = new Router()
@@ -14,5 +15,6 @@ router.get('/drugs/search', searchDrugs)
 router.get('/drugs/:id', getDrugById)
 router.get('/drugs', getDrugs)
 router.post('/drugs/analyze', analyzeDrug)
+router.post('/drugs', saveDrug)
 
 export default router

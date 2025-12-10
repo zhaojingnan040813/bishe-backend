@@ -243,6 +243,7 @@ export const analyzeDrug = async (ctx) => {
     }
 
     // 调用服务层的findOrAnalyze方法（实现缓存优先策略）
+    // 注意：AI分析结果不会自动保存，需要用户确认后调用saveDrug接口
     const result = await drugService.findOrAnalyze(name)
 
     ctx.body = {
@@ -274,6 +275,146 @@ export const analyzeDrug = async (ctx) => {
         error: {
           code: 'ANALYZE_DRUG_ERROR',
           message: error.message || '分析药物失败',
+        },
+        timestamp: Date.now(),
+      }
+    }
+  }
+}
+
+/**
+ * @swagger
+ * /api/drugs:
+ *   post:
+ *     summary: 保存药物到数据库
+ *     tags: [Drugs]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - description
+ *               - category
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: 药物名称
+ *               genericName:
+ *                 type: string
+ *                 description: 通用名
+ *               description:
+ *                 type: string
+ *                 description: 描述
+ *               category:
+ *                 type: string
+ *                 description: 分类
+ *               sideEffects:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 副作用
+ *               contraindications:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: 禁忌症
+ *               dosage:
+ *                 type: string
+ *                 description: 用法用量
+ *               aiAnalysis:
+ *                 type: string
+ *                 description: AI分析结果
+ *               source:
+ *                 type: string
+ *                 enum: [manual, ai]
+ *                 description: 数据来源
+ *     responses:
+ *       201:
+ *         description: 成功保存药物
+ *       400:
+ *         description: 请求参数错误
+ *       409:
+ *         description: 药物已存在
+ *       500:
+ *         description: 服务器错误
+ */
+export const saveDrug = async (ctx) => {
+  try {
+    const drugData = ctx.request.body
+
+    // 参数验证
+    if (!drugData.name || typeof drugData.name !== 'string' || drugData.name.trim().length === 0) {
+      ctx.status = 400
+      ctx.body = {
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: '药物名称不能为空',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    if (!drugData.description) {
+      ctx.status = 400
+      ctx.body = {
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: '药物描述不能为空',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    if (!drugData.category) {
+      ctx.status = 400
+      ctx.body = {
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: '药物分类不能为空',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    // 调用服务层创建药物
+    const drug = await drugService.create(drugData)
+
+    ctx.status = 201
+    ctx.body = {
+      success: true,
+      data: drug,
+      timestamp: Date.now(),
+    }
+  } catch (error) {
+    logger.error('保存药物失败', { error: error.message })
+
+    // 判断是否为重复错误
+    if (error.message.includes('已存在')) {
+      ctx.status = 409
+      ctx.body = {
+        success: false,
+        error: {
+          code: 'DRUG_EXISTS',
+          message: error.message,
+        },
+        timestamp: Date.now(),
+      }
+    } else {
+      ctx.status = 500
+      ctx.body = {
+        success: false,
+        error: {
+          code: 'SAVE_DRUG_ERROR',
+          message: error.message || '保存药物失败',
         },
         timestamp: Date.now(),
       }
