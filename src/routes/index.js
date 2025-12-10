@@ -1,6 +1,7 @@
 import Router from '@koa/router'
 import drugRoutes from './drug.js'
 import interactionRoutes from './interaction.js'
+import graphRoutes from './graph.js'
 
 const router = new Router()
 
@@ -21,6 +22,7 @@ const apiRouter = new Router({ prefix: '/api' })
 // 注册路由模块
 apiRouter.use(drugRoutes.routes())
 apiRouter.use(interactionRoutes.routes())
+apiRouter.use(graphRoutes.routes())
 
 router.use(apiRouter.routes())
 

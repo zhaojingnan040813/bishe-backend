@@ -49,6 +49,10 @@ router.get('/swagger.json', (ctx) => {
         name: 'Interactions',
         description: '药物相互作用相关接口',
       },
+      {
+        name: 'Graph',
+        description: '药物关系图谱接口',
+      },
     ],
     paths: {
       '/api/drugs': {
@@ -146,19 +150,54 @@ router.get('/swagger.json', (ctx) => {
       },
       '/api/drugs/graph': {
         get: {
-          tags: ['Drugs'],
+          tags: ['Graph'],
           summary: '获取药物关系图谱数据',
+          description: '获取药物关系图谱的节点和边数据，可选择筛选特定药物及其关联',
           parameters: [
             {
               name: 'drugId',
               in: 'query',
               schema: { type: 'string' },
-              description: '可选的药物ID，用于筛选特定药物的关系',
+              description: '可选的药物ID，用于筛选特定药物及其关联药物',
             },
           ],
           responses: {
-            200: { description: '成功返回图谱数据' },
-            500: { description: '服务器错误' },
+            200: { description: '成功获取图谱数据' },
+            404: { description: '指定的药物不存在' },
+            500: { description: '服务器内部错误' },
+          },
+        },
+      },
+      '/api/drugs/graph/stats': {
+        get: {
+          tags: ['Graph'],
+          summary: '获取图谱统计信息',
+          description: '获取药物图谱的整体统计信息，包括药物总数、相互作用总数和严重程度分布',
+          responses: {
+            200: { description: '成功获取统计信息' },
+            500: { description: '服务器内部错误' },
+          },
+        },
+      },
+      '/api/drugs/{drugId}/interactions/stats': {
+        get: {
+          tags: ['Graph'],
+          summary: '获取药物的相互作用统计',
+          description: '获取指定药物的相互作用统计信息，包括总数和各严重程度的数量',
+          parameters: [
+            {
+              name: 'drugId',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+              description: '药物ID',
+            },
+          ],
+          responses: {
+            200: { description: '成功获取统计信息' },
+            400: { description: '请求参数错误' },
+            404: { description: '药物不存在' },
+            500: { description: '服务器内部错误' },
           },
         },
       },
