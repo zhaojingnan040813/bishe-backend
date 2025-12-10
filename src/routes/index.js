@@ -20,9 +20,11 @@ router.get('/health', (ctx) => {
 const apiRouter = new Router({ prefix: '/api' })
 
 // 注册路由模块
+// 注意：graphRoutes 必须在 drugRoutes 之前注册
+// 因为 /drugs/graph 需要在 /drugs/:id 之前匹配
+apiRouter.use(graphRoutes.routes())
 apiRouter.use(drugRoutes.routes())
 apiRouter.use(interactionRoutes.routes())
-apiRouter.use(graphRoutes.routes())
 
 router.use(apiRouter.routes())
 
