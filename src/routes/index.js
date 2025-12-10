@@ -1,4 +1,6 @@
 import Router from '@koa/router'
+import drugRoutes from './drug.js'
+import interactionRoutes from './interaction.js'
 
 const router = new Router()
 
@@ -16,11 +18,9 @@ router.get('/health', (ctx) => {
 // API路由前缀
 const apiRouter = new Router({ prefix: '/api' })
 
-// 这里将添加其他路由模块
-// import drugRoutes from './drug.js'
-// import interactionRoutes from './interaction.js'
-// apiRouter.use(drugRoutes.routes())
-// apiRouter.use(interactionRoutes.routes())
+// 注册路由模块
+apiRouter.use(drugRoutes.routes())
+apiRouter.use(interactionRoutes.routes())
 
 router.use(apiRouter.routes())
 
