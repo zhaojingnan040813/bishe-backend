@@ -1,0 +1,46 @@
+# 排除开发环境配置
+.env
+.env.local
+.env.development
+.env.test
+
+# 排除开发依赖文件
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 排除版本控制
+.git
+.gitignore
+README.md
+
+# 排除IDE和编辑器文件
+.vscode
+.idea
+*.swp
+*.swo
+
+# 排除测试文件
+test/
+coverage/
+.nyc_output
+
+# 排除日志文件
+logs/
+*.log
+
+# 排除操作系统文件
+.DS_Store
+Thumbs.db
+
+# 排除Docker相关文件
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# 排除其他配置文件
+.eslintrc*
+.prettierrc*
+jest.config.*
+tsconfig.json

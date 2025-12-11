@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  drug-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: drug-interaction-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    volumes:
+      # 挂载日志目录（可选，用于日志持久化）
+      - ./logs:/app/logs
+    networks:
+      - drug-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+networks:
+  drug-network:
+    driver: bridge
+    name: drug-interaction-network
+
+# 使用说明:
+# 1. 确保 .env.docker 文件已配置
+# 2. 运行: docker-compose up -d
+# 3. 查看日志: docker-compose logs -f
+# 4. 停止服务: docker-compose down
