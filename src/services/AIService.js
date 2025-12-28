@@ -25,7 +25,7 @@ class AIService {
    */
   async analyzeDrug(drugName) {
     const startTime = Date.now()
-    
+
     try {
       logger.info('AI调用开始', {
         timestamp: new Date().toISOString(),
@@ -89,7 +89,7 @@ class AIService {
       return result
     } catch (error) {
       const duration = Date.now() - startTime
-      
+
       logger.error('AI调用失败', {
         timestamp: new Date().toISOString(),
         method: 'analyzeDrug',
@@ -241,6 +241,121 @@ class AIService {
         reject(new Error('AI_TIMEOUT'))
       }, this.timeout)
     })
+  }
+
+  /**
+   * 流式聊天对话
+   * @param {string} message - 用户消息
+   * @param {Array} history - 对话历史（可选）
+   * @returns {AsyncGenerator<string>} 流式文本生成器
+   */
+  async *streamChat(message, history = []) {
+    const startTime = Date.now()
+
+    // 验证消息不能为空
+    if (!message || typeof message !== 'string' || message.trim().length === 0) {
+      const validationError = new Error('消息内容不能为空')
+      validationError.code = 'INVALID_MESSAGE'
+      validationError.status = 400
+      throw validationError
+    }
+
+    try {
+      logger.info('AI流式对话开始', {
+        timestamp: new Date().toISOString(),
+        method: 'streamChat',
+        params: { message, historyLength: history.length },
+      })
+
+      // 构建系统提示词
+      const systemPrompt = `你是一位精通药物学的医学科学家，拥有深厚的药理学、化学和临床医学知识。
+
+你的职责是：
+1. 提供专业、权威、详细的药物知识解答
+2. 解释药物相互作用时，必须详细说明：
+   - 相关化学分子间的反应机制
+   - 导致副作用的分子层面原因
+   - 药物相生相克的具体原理
+   - 化学成分、作用机制和临床意义
+3. 使用科学严谨的语言，但保持易于理解
+4. 在必要时引用相关研究或临床指南
+5. 对于复杂的化学机制，使用类比和图示化描述帮助理解
+
+注意事项：
+- 始终强调本信息仅供参考，不作为医疗诊断或用药建议
+- 建议用户在用药前咨询专业医师或药师
+- 对于严重的药物相互作用，明确警示风险等级`
+
+      // 构建消息数组
+      const messages = [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        ...history,
+        {
+          role: 'user',
+          content: message,
+        },
+      ]
+
+      // 创建流式请求
+      const stream = await this.client.chat.completions.create({
+        model: this.model,
+        messages: messages,
+        stream: true,
+        temperature: 0.7,
+      })
+
+      // 逐块返回内容
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content
+        if (content) {
+          yield content
+        }
+      }
+
+      const duration = Date.now() - startTime
+      logger.info('AI流式对话完成', {
+        timestamp: new Date().toISOString(),
+        method: 'streamChat',
+        params: { message, historyLength: history.length },
+        duration: `${duration}ms`,
+      })
+
+    } catch (error) {
+      const duration = Date.now() - startTime
+
+      logger.error('AI流式对话失败', {
+        timestamp: new Date().toISOString(),
+        method: 'streamChat',
+        params: { message, historyLength: history.length },
+        duration: `${duration}ms`,
+        error: error.message,
+        stack: error.stack,
+      })
+
+      // 根据错误类型抛出不同的错误
+      if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+        const connectionError = new Error('无法连接到AI服务')
+        connectionError.code = 'AI_CONNECTION_ERROR'
+        connectionError.status = 502
+        throw connectionError
+      }
+
+      if (error.message && error.message.includes('timeout')) {
+        const timeoutError = new Error('AI响应超时')
+        timeoutError.code = 'AI_TIMEOUT'
+        timeoutError.status = 504
+        throw timeoutError
+      }
+
+      // 其他错误
+      const aiError = new Error('AI服务异常')
+      aiError.code = 'AI_SERVICE_ERROR'
+      aiError.status = 500
+      throw aiError
+    }
   }
 
   /**
