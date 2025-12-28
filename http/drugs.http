@@ -1,0 +1,133 @@
+### 药物相关接口测试用例
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+###############################################
+# 药物管理接口
+###############################################
+
+### 1. 获取药物列表 - 默认分页
+GET {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+### 2. 获取药物列表 - 指定分页参数
+GET {{baseUrl}}/api/drugs?page=1&limit=10
+Content-Type: {{contentType}}
+
+### 3. 获取药物列表 - 第二页
+GET {{baseUrl}}/api/drugs?page=2&limit=5
+Content-Type: {{contentType}}
+
+### 4. 获取药物列表 - 边界测试（大页码）
+GET {{baseUrl}}/api/drugs?page=999&limit=10
+Content-Type: {{contentType}}
+
+### 5. 搜索药物 - 精确匹配
+GET {{baseUrl}}/api/drugs/search?name=艾司唑仑
+Content-Type: {{contentType}}
+
+### 6. 搜索药物 - 模糊匹配
+GET {{baseUrl}}/api/drugs/search?name=感冒
+Content-Type: {{contentType}}
+
+### 7. 搜索药物 - 不存在的药物
+GET {{baseUrl}}/api/drugs/search?name=不存在的药物名称
+Content-Type: {{contentType}}
+
+### 8. 搜索药物 - 缺少参数（异常测试）
+GET {{baseUrl}}/api/drugs/search
+Content-Type: {{contentType}}
+
+### 9. 获取药物详情 - 有效ID
+GET {{baseUrl}}/api/drugs/6938dc0ce1ed2492e2ef26b8
+Content-Type: {{contentType}}
+
+### 10. 获取药物详情 - 无效ID格式
+GET {{baseUrl}}/api/drugs/invalid-id-format
+Content-Type: {{contentType}}
+
+### 11. 获取药物详情 - 不存在的ID
+GET {{baseUrl}}/api/drugs/507f1f77bcf86cd799439999
+Content-Type: {{contentType}}
+
+### 12. 保存药物 - 完整信息
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "name": "阿莫西林",
+  "genericName": "Amoxicillin",
+  "description": "青霉素类抗生素，用于治疗细菌感染",
+  "category": "抗生素",
+  "sideEffects": ["过敏反应", "腹泻", "恶心"],
+  "contraindications": ["青霉素过敏者禁用"],
+  "dosage": "成人：每次0.5g，每日3次",
+  "source": "manual"
+}
+
+### 13. 保存药物 - 最小必填信息
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "name": "测试药物最小信息",
+  "description": "这是一个测试药物",
+  "category": "测试类别"
+}
+
+### 14. 保存药物 - 缺少必填字段（异常测试）
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "genericName": "Test Generic Name"
+}
+
+### 15. 保存药物 - 重复药物名称（异常测试）
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "name": "艾司唑仑",
+  "description": "重复的药物",
+  "category": "测试"
+}
+
+### 16. AI分析药物 - 常见药物
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "阿司匹林"
+}
+
+### 17. AI分析药物 - 中成药
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "999感冒灵"
+}
+
+### 18. AI分析药物 - 不常见药物
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "罕见药物测试"
+}
+
+### 19. AI分析药物 - 缺少参数（异常测试）
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+}
+
+### 20. AI分析药物 - 空字符串（异常测试）
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": ""
+}

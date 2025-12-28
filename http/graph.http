@@ -1,0 +1,63 @@
+### 药物关系图谱接口测试用例
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+###############################################
+# 药物关系图谱数据接口
+###############################################
+
+### 1. 获取完整药物关系图谱
+GET {{baseUrl}}/api/drugs/graph
+Content-Type: {{contentType}}
+
+### 2. 获取指定药物的关系图谱 - 有效药物ID
+GET {{baseUrl}}/api/drugs/graph?drugId=6938dc0be1ed2492e2ef268e
+Content-Type: {{contentType}}
+
+### 3. 获取指定药物的关系图谱 - 另一个有效药物ID
+GET {{baseUrl}}/api/drugs/graph?drugId=6938dc0ce1ed2492e2ef26b8
+Content-Type: {{contentType}}
+
+### 4. 获取指定药物的关系图谱 - 无效ID格式
+GET {{baseUrl}}/api/drugs/graph?drugId=invalid-drug-id
+Content-Type: {{contentType}}
+
+### 5. 获取指定药物的关系图谱 - 不存在的药物ID
+GET {{baseUrl}}/api/drugs/graph?drugId=507f1f77bcf86cd799439999
+Content-Type: {{contentType}}
+
+### 6. 获取指定药物的关系图谱 - 没有相互作用的药物
+GET {{baseUrl}}/api/drugs/graph?drugId=6938e9ebadbe479a1596e839
+Content-Type: {{contentType}}
+
+###############################################
+# 图谱统计信息接口
+###############################################
+
+### 7. 获取图谱整体统计信息
+GET {{baseUrl}}/api/drugs/graph/stats
+Content-Type: {{contentType}}
+
+###############################################
+# 综合测试场景
+###############################################
+
+### 8. 场景测试：查看特定药物的图谱和统计
+# 步骤1：获取药物详情
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef268e
+Content-Type: {{contentType}}
+
+### 9. 场景测试：查看特定药物的图谱和统计
+# 步骤2：获取该药物的关系图谱
+GET {{baseUrl}}/api/drugs/graph?drugId=6938dc0be1ed2492e2ef268e
+Content-Type: {{contentType}}
+
+### 10. 场景测试：查看特定药物的图谱和统计
+# 步骤3：获取该药物的相互作用统计
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef268e/interactions/stats
+Content-Type: {{contentType}}
+
+### 11. 场景测试：查看特定药物的图谱和统计
+# 步骤4：获取整体图谱统计
+GET {{baseUrl}}/api/drugs/graph/stats
+Content-Type: {{contentType}}

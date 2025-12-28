@@ -1,0 +1,268 @@
+### 综合业务场景测试用例
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+###############################################
+# 场景1：新药物录入与分析完整流程
+###############################################
+
+### 1.1 使用AI分析新药物
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "布洛芬"
+}
+
+### 1.2 保存AI分析的药物到数据库
+# 注意：需要使用上一步返回的数据
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "name": "布洛芬",
+  "genericName": "Ibuprofen",
+  "description": "非甾体抗炎药，用于缓解疼痛和炎症",
+  "category": "解热镇痛药",
+  "sideEffects": ["胃肠道不适", "头痛", "皮疹"],
+  "contraindications": ["消化道溃疡患者禁用", "对阿司匹林过敏者慎用"],
+  "dosage": "成人：每次200-400mg，每日3-4次",
+  "source": "ai"
+}
+
+### 1.3 搜索验证药物已保存
+GET {{baseUrl}}/api/drugs/search?name=布洛芬
+Content-Type: {{contentType}}
+
+###############################################
+# 场景2：药物相互作用检测流程
+###############################################
+
+### 2.1 搜索第一种药物
+GET {{baseUrl}}/api/drugs/search?name=艾司唑仑
+Content-Type: {{contentType}}
+
+### 2.2 搜索第二种药物
+GET {{baseUrl}}/api/drugs/search?name=地西泮
+Content-Type: {{contentType}}
+
+### 2.3 检测两种药物的相互作用
+# 注意：使用实际的药物ID
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0ce1ed2492e2ef26b8",
+    "6938dc0ce1ed2492e2ef26b5"
+  ]
+}
+
+### 2.4 查看相互作用详情
+# 注意：使用上一步返回的相互作用ID
+GET {{baseUrl}}/api/interactions/6938dc0ce1ed2492e2ef26e5
+Content-Type: {{contentType}}
+
+###############################################
+# 场景3：多药物联用安全性评估
+###############################################
+
+### 3.1 获取药物列表（选择多个药物）
+GET {{baseUrl}}/api/drugs?page=1&limit=10
+Content-Type: {{contentType}}
+
+### 3.2 检测多药物相互作用
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0be1ed2492e2ef2691",
+    "6938dc0be1ed2492e2ef2694",
+    "6938dc0ce1ed2492e2ef26b8"
+  ]
+}
+
+### 3.3 查看第一个药物的相互作用统计
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef2691/interactions/stats
+Content-Type: {{contentType}}
+
+### 3.4 查看第二个药物的相互作用统计
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef2694/interactions/stats
+Content-Type: {{contentType}}
+
+###############################################
+# 场景4：药物关系图谱分析
+###############################################
+
+### 4.1 获取整体图谱统计
+GET {{baseUrl}}/api/drugs/graph/stats
+Content-Type: {{contentType}}
+
+### 4.2 获取完整药物关系图谱
+GET {{baseUrl}}/api/drugs/graph
+Content-Type: {{contentType}}
+
+### 4.3 查看特定药物的关系网络
+GET {{baseUrl}}/api/drugs/graph?drugId=6938dc0be1ed2492e2ef268e
+Content-Type: {{contentType}}
+
+### 4.4 获取该药物的详细信息
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef268e
+Content-Type: {{contentType}}
+
+###############################################
+# 场景5：药物信息查询与更新
+###############################################
+
+### 5.1 搜索药物
+GET {{baseUrl}}/api/drugs/search?name=感冒
+Content-Type: {{contentType}}
+
+### 5.2 获取搜索结果中某个药物的详情
+GET {{baseUrl}}/api/drugs/6938eefeadbe479a1596e84c
+Content-Type: {{contentType}}
+
+### 5.3 查看该药物的相互作用统计
+GET {{baseUrl}}/api/drugs/6938eefeadbe479a1596e84c/interactions/stats
+Content-Type: {{contentType}}
+
+### 5.4 查看该药物在图谱中的关系
+GET {{baseUrl}}/api/drugs/graph?drugId=6938eefeadbe479a1596e84c
+Content-Type: {{contentType}}
+
+###############################################
+# 场景6：批量药物分析
+###############################################
+
+### 6.1 分析第一个药物
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "阿莫西林"
+}
+
+### 6.2 分析第二个药物
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "头孢克肟"
+}
+
+### 6.3 分析第三个药物
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": "罗红霉素"
+}
+
+### 6.4 保存第一个药物
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "name": "阿莫西林",
+  "genericName": "Amoxicillin",
+  "description": "青霉素类抗生素",
+  "category": "抗生素",
+  "source": "ai"
+}
+
+### 6.5 保存第二个药物
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "name": "头孢克肟",
+  "genericName": "Cefixime",
+  "description": "第三代头孢菌素类抗生素",
+  "category": "抗生素",
+  "source": "ai"
+}
+
+### 6.6 检测新保存药物的相互作用
+# 注意：使用实际返回的药物ID
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "新药物ID1",
+    "新药物ID2"
+  ]
+}
+
+###############################################
+# 场景7：异常处理测试
+###############################################
+
+### 7.1 测试无效的药物ID格式
+GET {{baseUrl}}/api/drugs/invalid-format-id
+Content-Type: {{contentType}}
+
+### 7.2 测试不存在的药物
+GET {{baseUrl}}/api/drugs/507f1f77bcf86cd799439999
+Content-Type: {{contentType}}
+
+### 7.3 测试空搜索关键词
+GET {{baseUrl}}/api/drugs/search?name=
+Content-Type: {{contentType}}
+
+### 7.4 测试单个药物的相互作用检测
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": ["6938dc0ce1ed2492e2ef26b8"]
+}
+
+### 7.5 测试空药物列表
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": []
+}
+
+### 7.6 测试缺少必填字段的药物保存
+POST {{baseUrl}}/api/drugs
+Content-Type: {{contentType}}
+
+{
+  "genericName": "Test Only"
+}
+
+### 7.7 测试AI分析空药物名称
+POST {{baseUrl}}/api/drugs/analyze
+Content-Type: {{contentType}}
+
+{
+  "name": ""
+}
+
+###############################################
+# 场景8：边界条件测试
+###############################################
+
+### 8.1 测试大页码查询
+GET {{baseUrl}}/api/drugs?page=9999&limit=10
+Content-Type: {{contentType}}
+
+### 8.2 测试极小limit值
+GET {{baseUrl}}/api/drugs?page=1&limit=1
+Content-Type: {{contentType}}
+
+### 8.3 测试极大limit值
+GET {{baseUrl}}/api/drugs?page=1&limit=1000
+Content-Type: {{contentType}}
+
+### 8.4 测试负数页码
+GET {{baseUrl}}/api/drugs?page=-1&limit=10
+Content-Type: {{contentType}}
+
+### 8.5 测试非数字页码
+GET {{baseUrl}}/api/drugs?page=abc&limit=xyz
+Content-Type: {{contentType}}

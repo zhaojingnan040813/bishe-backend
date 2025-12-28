@@ -1,0 +1,149 @@
+### 药物相互作用接口测试用例
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+###############################################
+# 药物相互作用检测接口
+###############################################
+
+### 1. 检测药物相互作用 - 两种药物
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0ce1ed2492e2ef26b8",
+    "6938dc0ce1ed2492e2ef26b5"
+  ]
+}
+
+### 2. 检测药物相互作用 - 多种药物（3种）
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0be1ed2492e2ef268e",
+    "6938dc0ce1ed2492e2ef26a9",
+    "6938dc0ce1ed2492e2ef26ac"
+  ]
+}
+
+### 3. 检测药物相互作用 - 多种药物（5种）
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0be1ed2492e2ef2691",
+    "6938dc0be1ed2492e2ef2694",
+    "6938dc0ce1ed2492e2ef26b8",
+    "6938dc0ce1ed2492e2ef26b5",
+    "6938dc0be1ed2492e2ef268e"
+  ]
+}
+
+### 4. 检测药物相互作用 - 只有一种药物（异常测试）
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0ce1ed2492e2ef26b8"
+  ]
+}
+
+### 5. 检测药物相互作用 - 空数组（异常测试）
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": []
+}
+
+### 6. 检测药物相互作用 - 缺少参数（异常测试）
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+}
+
+### 7. 检测药物相互作用 - 无效的药物ID
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "invalid-id-1",
+    "invalid-id-2"
+  ]
+}
+
+### 8. 检测药物相互作用 - 不存在的药物ID
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "507f1f77bcf86cd799439999",
+    "507f1f77bcf86cd799439998"
+  ]
+}
+
+### 9. 检测药物相互作用 - 混合有效和无效ID
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0ce1ed2492e2ef26b8",
+    "invalid-id"
+  ]
+}
+
+### 10. 检测药物相互作用 - 重复的药物ID
+POST {{baseUrl}}/api/interactions/check
+Content-Type: {{contentType}}
+
+{
+  "drugIds": [
+    "6938dc0ce1ed2492e2ef26b8",
+    "6938dc0ce1ed2492e2ef26b8"
+  ]
+}
+
+###############################################
+# 相互作用详情查询接口
+###############################################
+
+### 11. 获取相互作用详情 - 有效ID
+GET {{baseUrl}}/api/interactions/6938dc0ce1ed2492e2ef26e5
+Content-Type: {{contentType}}
+
+### 12. 获取相互作用详情 - 无效ID格式
+GET {{baseUrl}}/api/interactions/invalid-interaction-id
+Content-Type: {{contentType}}
+
+### 13. 获取相互作用详情 - 不存在的ID
+GET {{baseUrl}}/api/interactions/507f1f77bcf86cd799439999
+Content-Type: {{contentType}}
+
+###############################################
+# 药物相互作用统计接口
+###############################################
+
+### 14. 获取指定药物的相互作用统计 - 有效ID
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef268b/interactions/stats
+Content-Type: {{contentType}}
+
+### 15. 获取指定药物的相互作用统计 - 另一个有效ID
+GET {{baseUrl}}/api/drugs/6938dc0be1ed2492e2ef268e/interactions/stats
+Content-Type: {{contentType}}
+
+### 16. 获取指定药物的相互作用统计 - 无效ID格式
+GET {{baseUrl}}/api/drugs/invalid-drug-id/interactions/stats
+Content-Type: {{contentType}}
+
+### 17. 获取指定药物的相互作用统计 - 不存在的药物
+GET {{baseUrl}}/api/drugs/507f1f77bcf86cd799439999/interactions/stats
+Content-Type: {{contentType}}
