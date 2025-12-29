@@ -2,6 +2,7 @@ import Router from '@koa/router'
 import drugRoutes from './drug.js'
 import interactionRoutes from './interaction.js'
 import graphRoutes from './graph.js'
+import chatRoutes from './chat.js'
 
 const router = new Router()
 
@@ -25,6 +26,7 @@ const apiRouter = new Router({ prefix: '/api' })
 apiRouter.use(graphRoutes.routes())
 apiRouter.use(drugRoutes.routes())
 apiRouter.use(interactionRoutes.routes())
+apiRouter.use(chatRoutes.routes())
 
 router.use(apiRouter.routes())
 
