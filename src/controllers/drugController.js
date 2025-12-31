@@ -1,10 +1,157 @@
 import { drugService } from '../services/DrugService.js'
+import { aiService } from '../services/AIService.js'
 import { logger } from '../utils/logger.js'
 
 /**
  * 药物控制器
  * 处理药物相关的HTTP请求
  */
+
+/**
+ * @swagger
+ * /api/drugs/validate-name:
+ *   post:
+ *     summary: 验证输入是否为有效的药物名称
+ *     tags: [Drugs]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: 待验证的输入内容
+ *     responses:
+ *       200:
+ *         description: 验证结果
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     valid:
+ *                       type: boolean
+ *                       description: 是否为有效的药物名称
+ *                     reason:
+ *                       type: string
+ *                       description: 判断理由
+ *       400:
+ *         description: 请求参数错误
+ */
+export const validateDrugName = async (ctx) => {
+  try {
+    const { name } = ctx.request.body
+
+    // 参数验证
+    if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      ctx.status = 400
+      ctx.body = {
+        success: false,
+        error: {
+          code: 'INVALID_PARAMETER',
+          message: '输入内容不能为空',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    const trimmedName = name.trim()
+
+    // 基础校验：长度限制
+    if (trimmedName.length < 2) {
+      ctx.body = {
+        success: true,
+        data: {
+          valid: false,
+          reason: '名称太短',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    if (trimmedName.length > 50) {
+      ctx.body = {
+        success: true,
+        data: {
+          valid: false,
+          reason: '名称太长',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    // 基础校验：纯数字
+    if (/^\d+$/.test(trimmedName)) {
+      ctx.body = {
+        success: true,
+        data: {
+          valid: false,
+          reason: '不能为纯数字',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    // 基础校验：特殊字符过多
+    if (!/^[\u4e00-\u9fa5a-zA-Z0-9\s\-·()（）]+$/.test(trimmedName)) {
+      ctx.body = {
+        success: true,
+        data: {
+          valid: false,
+          reason: '包含非法字符',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    // 基础校验：连续重复字符
+    if (/(.)\1{3,}/.test(trimmedName)) {
+      ctx.body = {
+        success: true,
+        data: {
+          valid: false,
+          reason: '包含重复字符',
+        },
+        timestamp: Date.now(),
+      }
+      return
+    }
+
+    // 调用AI进行智能验证
+    const result = await aiService.validateDrugName(trimmedName)
+
+    ctx.body = {
+      success: true,
+      data: result,
+      timestamp: Date.now(),
+    }
+  } catch (error) {
+    logger.error('验证药物名称失败', { error: error.message })
+    ctx.status = 500
+    ctx.body = {
+      success: false,
+      error: {
+        code: 'VALIDATE_NAME_ERROR',
+        message: error.message || '验证失败',
+      },
+      timestamp: Date.now(),
+    }
+  }
+}
 
 /**
  * @swagger

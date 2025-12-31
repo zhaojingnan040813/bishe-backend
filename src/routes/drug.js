@@ -5,6 +5,7 @@ import {
   getDrugById,
   analyzeDrug,
   saveDrug,
+  validateDrugName,
 } from '../controllers/drugController.js'
 
 const router = new Router()
@@ -14,6 +15,7 @@ const router = new Router()
 router.get('/drugs/search', searchDrugs)
 router.get('/drugs/:id', getDrugById)
 router.get('/drugs', getDrugs)
+router.post('/drugs/validate-name', validateDrugName)
 router.post('/drugs/analyze', analyzeDrug)
 router.post('/drugs', saveDrug)
 

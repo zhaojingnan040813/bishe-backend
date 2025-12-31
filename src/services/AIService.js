@@ -359,6 +359,90 @@ class AIService {
   }
 
   /**
+   * 验证输入是否为有效的药物名称
+   * @param {string} input - 用户输入
+   * @returns {Promise<Object>} 验证结果 { valid: boolean, reason?: string }
+   */
+  async validateDrugName(input) {
+    const startTime = Date.now()
+
+    try {
+      logger.info('AI药物名称验证开始', {
+        timestamp: new Date().toISOString(),
+        method: 'validateDrugName',
+        params: { input },
+      })
+
+      const prompt = `请判断以下输入是否可能是一个药物名称（包括处方药、非处方药、中药、保健品等）。
+
+输入内容：${input}
+
+判断标准：
+1. 如果输入看起来像是药物名称、药品商品名、药物通用名、中药名、保健品名称，返回 valid: true
+2. 如果输入是无意义的字符、测试文字、脏话、与药物完全无关的内容，返回 valid: false
+
+请以JSON格式返回：
+{
+  "valid": true或false,
+  "reason": "简短说明判断理由（10字以内）"
+}`
+
+      const response = await Promise.race([
+        this.client.chat.completions.create({
+          model: this.model,
+          messages: [
+            {
+              role: 'system',
+              content: '你是一个药物名称验证助手，只需要判断输入是否可能是药物名称，不需要验证药物是否真实存在。回答要简洁。',
+            },
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.3,
+          max_tokens: 100,
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('AI_TIMEOUT')), 15000)), // 15秒超时
+      ])
+
+      const content = response.choices[0].message.content
+      const result = JSON.parse(content)
+
+      const duration = Date.now() - startTime
+      logger.info('AI药物名称验证完成', {
+        timestamp: new Date().toISOString(),
+        method: 'validateDrugName',
+        params: { input },
+        result,
+        duration: `${duration}ms`,
+      })
+
+      return {
+        valid: result.valid === true,
+        reason: result.reason || (result.valid ? '有效的药物名称' : '无效的输入'),
+      }
+    } catch (error) {
+      const duration = Date.now() - startTime
+
+      logger.error('AI药物名称验证失败', {
+        timestamp: new Date().toISOString(),
+        method: 'validateDrugName',
+        params: { input },
+        duration: `${duration}ms`,
+        error: error.message,
+      })
+
+      // 验证失败时默认放行，让后续的分析接口处理
+      return {
+        valid: true,
+        reason: '验证服务暂时不可用',
+      }
+    }
+  }
+
+  /**
    * 健康检查
    * @returns {Promise<boolean>} 是否健康
    */
